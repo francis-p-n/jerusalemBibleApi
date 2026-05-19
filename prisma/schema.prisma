@@ -1,0 +1,44 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Book {
+  id            Int       @id @default(autoincrement())
+  slug          String    @unique
+  name          String    @unique
+  shortName     String
+  testament     String    // "Old" or "New"
+  genre         String    // "Pentateuch", "Historical", "Wisdom", "Prophets", "Deuterocanon", "Gospels", "Acts", "Epistles", "Revelation"
+  order         Int       @unique   // 1 to 73
+  chaptersCount Int
+  chapters      Chapter[]
+}
+
+model Chapter {
+  id          Int     @id @default(autoincrement())
+  bookId      Int
+  number      Int     // Chapter number (1, 2, 3...)
+  versesCount Int
+  book        Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  verses      Verse[]
+
+  @@unique([bookId, number])
+}
+
+model Verse {
+  id         Int     @id @default(autoincrement())
+  chapterId  Int
+  number     Int     // Verse number (1, 2, 3...)
+  text       String  // Verse content
+  bookSlug   String  // De-normalized book slug for rapid querying
+  chapterNum Int     // De-normalized chapter number for rapid querying
+  chapter    Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([chapterId, number])
+  @@index([bookSlug, chapterNum, number])
+}

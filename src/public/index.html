@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerusalem Bible API — Premium Developer Portal</title>
+    <meta name="description" content="A highly performant, production-grade REST API for the Jerusalem Bible translation. Explore the 73-book Catholic Canon with full-text search and advanced reference parsing.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Inline styles for beautiful presentation and instant load -->
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-primary: #8b5cf6; /* Vibrant violet */
+            --accent-secondary: #ec4899; /* Deep pink */
+            --accent-glow: rgba(139, 92, 246, 0.15);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --code-bg: #07090e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* Container & Navigation */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-symbol {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .logo-symbol::after {
+            content: '†';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -55%);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 5rem 0 3rem 0;
+        }
+
+        .badge {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #c084fc;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #f3f4f6, #d1d5db, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2rem auto;
+        }
+
+        /* Grid Framework for Playground */
+        .playground-section {
+            padding: 3rem 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Glassmorphic Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.2rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(139, 92, 246, 0.2);
+            box-shadow: 0 10px 40px 0 var(--accent-glow);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-title svg {
+            color: var(--accent-primary);
+        }
+
+        /* Interactive Playground Controls */
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.35rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: #c084fc;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 0.9rem 1.8rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.95;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Scripture Display & JSON Output */
+        .output-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Elegant Verse Text Style */
+        .scripture-view {
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .scripture-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            color: #d8b4fe;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .verse-paragraph {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            line-height: 1.7;
+            text-align: justify;
+            color: #e5e7eb;
+        }
+
+        .verse-num {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-secondary);
+            vertical-align: super;
+            margin-right: 0.25rem;
+            margin-left: 0.3rem;
+        }
+
+        /* JSON Editor Panel */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.2rem;
+            overflow: auto;
+            max-height: 380px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #a7f3d0; /* Soft emerald */
+        }
+
+        /* Code snippets section */
+        .code-snippets {
+            margin-top: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        .snippet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            color: var(--text-main);
+        }
+
+        .snippet-pre {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+        /* Endpoint reference badges */
+        .endpoints-list {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .endpoint-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .endpoint-badge {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background: #10b981;
+            color: white;
+        }
+
+        .endpoint-badge.get {
+            background: #10b981;
+        }
+
+        .endpoint-path {
+            font-family: 'Fira Code', monospace;
+            color: #d1d5db;
+            margin-left: 0.75rem;
+            flex-grow: 1;
+        }
+
+        .endpoint-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Scrollbar decoration */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Nav -->
+        <header>
+            <div class="logo">
+                <div class="logo-symbol"></div>
+                Jerusalem Bible API
+            </div>
+            <nav class="nav-links">
+                <a href="#playground">Playground</a>
+                <a href="#endpoints">Endpoints</a>
+                <a href="#snippets">Snippets</a>
+                <a href="/api/health" target="_blank">Health Status</a>
+            </nav>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <span class="badge">73-Book Catholic Canon</span>
+            <h1>The Jerusalem Bible API</h1>
+            <p>Access the beautiful, standard Catholic translation of Sacred Scripture liturgically used across the world. Built for developers with fast search indexing and advanced reference parsing.</p>
+        </section>
+
+        <!-- Playground Grid -->
+        <section class="playground-section" id="playground">
+            <div class="grid">
+                <!-- Card 1: Live API Runner -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Interactive Playground
+                    </h2>
+                    
+                    <div class="input-group">
+                        <label class="input-label" for="queryType">Query Mode</label>
+                        <select class="form-control" id="queryType" onchange="onQueryTypeChange()">
+                            <option value="passage">Retrieve Passage</option>
+                            <option value="search">Keyword Search</option>
+                            <option value="books">Get Books List</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group" id="refGroup">
+                        <label class="input-label" for="refInput">Scripture Reference</label>
+                        <input type="text" class="form-control" id="refInput" value="John 3:16" placeholder="e.g. John 3:16-18, Wisdom 3:1-5">
+                    </div>
+
+                    <div class="input-group" id="searchGroup" style="display: none;">
+                        <label class="input-label" for="searchInput">Search Keyword</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="e.g. shepherd, beginning, virtue">
+                    </div>
+
+                    <!-- Presets -->
+                    <div class="input-label" id="presetsLabel">Try Sample Queries</div>
+                    <div class="preset-buttons" id="presetsContainer">
+                        <button class="preset-btn" onclick="applyPreset('John 3:16')">John 3:16</button>
+                        <button class="preset-btn" onclick="applyPreset('Wisdom 3:1-6')">Wisdom 3:1-6 (Deuterocanon)</button>
+                        <button class="preset-btn" onclick="applyPreset('Psalms 23:1-6')">Psalm 23</button>
+                        <button class="preset-btn" onclick="applyPreset('Luke 1:26-33')">Luke 1:26-33</button>
+                        <button class="preset-btn" onclick="applyPreset('Genesis 1:1-5')">Genesis 1:1-5</button>
+                    </div>
+
+                    <button class="btn" onclick="runQuery()" id="runBtn">
+                        Run API Request
+                    </button>
+                </div>
+
+                <!-- Card 2: Interactive Response Display -->
+                <div class="card">
+                    <div class="output-tabs">
+                        <button class="tab-btn active" id="tabTextBtn" onclick="switchTab('text')">Scripture View</button>
+                        <button class="tab-btn" id="tabJsonBtn" onclick="switchTab('json')">JSON Response</button>
+                    </div>
+
+                    <!-- Tab Content: Scripture View -->
+                    <div class="tab-content active" id="tabText">
+                        <div class="scripture-view" id="scriptureContainer">
+                            <div class="scripture-title" id="scriptureTitle">John 3:16</div>
+                            <div class="verse-paragraph" id="scriptureBody">
+                                <span class="verse-num">16</span>For God loved the world so much that he gave his only Son, so that everyone who believes in him may not be lost but may have eternal life.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: JSON -->
+                    <div class="tab-content" id="tabJson">
+                        <pre><code id="jsonContainer">{
+  "success": true,
+  "data": {
+    "reference": "John 3:16",
+    "book": {
+      "id": 50,
+      "name": "John",
+      "slug": "john",
+      "shortName": "John",
+      "testament": "New",
+      "genre": "Gospels"
+    },
+    "verses": [
+      {
+        "number": 16,
+        "chapter": 3,
+        "text": "For God loved the world so much that he gave his only Son, so that everyone who believes in him may not be lost but may have eternal life."
+      }
+    ]
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Endpoints Grid -->
+        <section class="playground-section" id="endpoints">
+            <h2 class="card-title" style="margin-bottom: 0.5rem;">API Endpoints</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2.2rem;">Every API request returns standard JSON format including status codes, execution duration, and timestamp details.</p>
+            
+            <div class="endpoints-list">
+                <div class="endpoint-row">
+                    <span class="endpoint-badge get">GET</span>
+                    <span class="endpoint-path">/api/v1/bible/books</span>
+                    <span class="endpoint-desc">List all 73 Catholic books of the Bible in order</span>
+                </div>
+                <div class="endpoint-row">
+                    <span class="endpoint-badge get">GET</span>
+                    <span class="endpoint-path">/api/v1/bible/books/:slug</span>
+                    <span class="endpoint-desc">Retrieve metadata & list of chapters of a book</span>
+                </div>
+                <div class="endpoint-row">
+                    <span class="endpoint-badge get">GET</span>
+                    <span class="endpoint-path">/api/v1/bible/passage?ref=:query</span>
+                    <span class="endpoint-desc">Fetch specific passages (e.g. John 3:16-18, Wisdom 3)</span>
+                </div>
+                <div class="endpoint-row">
+                    <span class="endpoint-badge get">GET</span>
+                    <span class="endpoint-path">/api/v1/bible/search?q=:keyword</span>
+                    <span class="endpoint-desc">Search keywords across scriptures with full pagination</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Code Snippets Section -->
+        <section class="code-snippets" id="snippets">
+            <h2 class="card-title" style="margin-bottom: 1.5rem;">Developer Snippets</h2>
+            
+            <div class="snippet-header">
+                <span>JavaScript Fetch Example</span>
+                <button class="copy-btn" onclick="copySnippet()">Copy Snippet</button>
+            </div>
+            <pre class="snippet-pre"><code style="color: #93c5fd;">// Fetching a Scripture passage in Javascript
+const fetchPassage = async (reference) => {
+  const url = `http://localhost:3000/api/v1/bible/passage?ref=${encodeURIComponent(reference)}`;
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.success) {
+      console.log(`Reference: ${json.data.reference}`);
+      json.data.verses.forEach(v => {
+        console.log(`[Ch ${v.chapter}:${v.number}] ${v.text}`);
+      });
+    }
+  } catch (err) {
+    console.error("API request failed:", err);
+  }
+};
+
+fetchPassage("John 3:16-18");</code></pre>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Jerusalem Bible API Project. Fully responsive Catholic Canon platform.</p>
+        </footer>
+    </div>
+
+    <!-- Live interaction Script -->
+    <script>
+        function onQueryTypeChange() {
+            const queryType = document.getElementById('queryType').value;
+            const refGroup = document.getElementById('refGroup');
+            const searchGroup = document.getElementById('searchGroup');
+            const presetsLabel = document.getElementById('presetsLabel');
+            const presetsContainer = document.getElementById('presetsContainer');
+
+            if (queryType === 'passage') {
+                refGroup.style.display = 'block';
+                searchGroup.style.display = 'none';
+                presetsLabel.style.display = 'block';
+                presetsContainer.style.display = 'flex';
+                presetsContainer.innerHTML = `
+                    <button class="preset-btn" onclick="applyPreset('John 3:16')">John 3:16</button>
+                    <button class="preset-btn" onclick="applyPreset('Wisdom 3:1-6')">Wisdom 3:1-6</button>
+                    <button class="preset-btn" onclick="applyPreset('Psalms 23:1-6')">Psalm 23</button>
+                    <button class="preset-btn" onclick="applyPreset('Luke 1:26-33')">Luke 1:26-33</button>
+                    <button class="preset-btn" onclick="applyPreset('Genesis 1:1-5')">Genesis 1:1-5</button>
+                `;
+            } else if (queryType === 'search') {
+                refGroup.style.display = 'none';
+                searchGroup.style.display = 'block';
+                presetsLabel.style.display = 'block';
+                presetsContainer.style.display = 'flex';
+                presetsContainer.innerHTML = `
+                    <button class="preset-btn" onclick="applySearchPreset('shepherd')">"shepherd"</button>
+                    <button class="preset-btn" onclick="applySearchPreset('beginning')">"beginning"</button>
+                    <button class="preset-btn" onclick="applySearchPreset('holocaust')">"holocaust"</button>
+                    <button class="preset-btn" onclick="applySearchPreset('light')">"light"</button>
+                    <button class="preset-btn" onclick="applySearchPreset('love')">"love"</button>
+                `;
+            } else {
+                refGroup.style.display = 'none';
+                searchGroup.style.display = 'none';
+                presetsLabel.style.display = 'none';
+                presetsContainer.style.display = 'none';
+            }
+        }
+
+        function applyPreset(ref) {
+            document.getElementById('refInput').value = ref;
+            runQuery();
+        }
+
+        function applySearchPreset(word) {
+            document.getElementById('searchInput').value = word;
+            runQuery();
+        }
+
+        function switchTab(tab) {
+            const textBtn = document.getElementById('tabTextBtn');
+            const jsonBtn = document.getElementById('tabJsonBtn');
+            const tabText = document.getElementById('tabText');
+            const tabJson = document.getElementById('tabJson');
+
+            if (tab === 'text') {
+                textBtn.classList.add('active');
+                jsonBtn.classList.remove('active');
+                tabText.classList.add('active');
+                tabJson.classList.remove('active');
+            } else {
+                textBtn.classList.remove('active');
+                jsonBtn.classList.add('active');
+                tabText.classList.remove('active');
+                tabJson.classList.add('active');
+            }
+        }
+
+        async function runQuery() {
+            const queryType = document.getElementById('queryType').value;
+            const runBtn = document.getElementById('runBtn');
+            runBtn.disabled = true;
+            runBtn.innerText = 'Executing Request...';
+
+            let endpoint = '';
+            if (queryType === 'passage') {
+                const ref = document.getElementById('refInput').value;
+                endpoint = `/api/v1/bible/passage?ref=${encodeURIComponent(ref)}`;
+            } else if (queryType === 'search') {
+                const q = document.getElementById('searchInput').value;
+                endpoint = `/api/v1/bible/search?q=${encodeURIComponent(q)}`;
+            } else {
+                endpoint = `/api/v1/bible/books`;
+            }
+
+            try {
+                const res = await fetch(endpoint);
+                const result = await res.json();
+                
+                // Render JSON tab
+                document.getElementById('jsonContainer').innerText = JSON.stringify(result, null, 2);
+
+                // Render Scripture tab
+                const scriptureTitle = document.getElementById('scriptureTitle');
+                const scriptureBody = document.getElementById('scriptureBody');
+
+                if (queryType === 'passage') {
+                    if (result.success && result.data) {
+                        scriptureTitle.innerText = result.data.reference;
+                        if (result.data.verses.length === 0) {
+                            scriptureBody.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">No verses found in seeded database for this reference.</span>';
+                        } else {
+                            scriptureBody.innerHTML = result.data.verses.map(v => 
+                                `<span class="verse-num">${v.number}</span>${v.text}`
+                            ).join(' ');
+                        }
+                    } else {
+                        scriptureTitle.innerText = 'Query Error';
+                        scriptureBody.innerHTML = `<span style="color: #ef4444;">${result.error?.message || 'Failed to fetch passage.'}</span>`;
+                    }
+                } else if (queryType === 'search') {
+                    if (result.success && result.data) {
+                        scriptureTitle.innerText = `Search results for "${document.getElementById('searchInput').value}" (${result.meta?.pagination?.total || 0} matches)`;
+                        if (result.data.length === 0) {
+                            scriptureBody.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">No matching verses found.</span>';
+                        } else {
+                            scriptureBody.innerHTML = result.data.map(v => 
+                                `<div style="margin-bottom: 1rem; border-left: 2px solid var(--accent-primary); padding-left: 0.75rem;">
+                                    <strong style="font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: #a78bfa;">${v.reference}</strong><br/>
+                                    ${v.text}
+                                 </div>`
+                            ).join('');
+                        }
+                    } else {
+                        scriptureTitle.innerText = 'Search Error';
+                        scriptureBody.innerHTML = `<span style="color: #ef4444;">${result.error?.message || 'Failed to execute search.'}</span>`;
+                    }
+                } else {
+                    if (result.success && result.data) {
+                        scriptureTitle.innerText = `Catholic Canon Book Index (${result.data.length} books)`;
+                        scriptureBody.innerHTML = `
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.75rem; font-family: 'Outfit', sans-serif; font-size: 0.9rem;">
+                                ${result.data.map(b => `
+                                    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 6px; text-align: center;">
+                                        <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">#${b.order} (${b.shortName})</span>
+                                        <strong>${b.name}</strong>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    } else {
+                        scriptureTitle.innerText = 'Request Error';
+                        scriptureBody.innerHTML = `<span style="color: #ef4444;">${result.error?.message || 'Failed to list books.'}</span>`;
+                    }
+                }
+            } catch (err) {
+                document.getElementById('jsonContainer').innerText = JSON.stringify({ error: err.message }, null, 2);
+                document.getElementById('scriptureTitle').innerText = 'Network Connection Error';
+                document.getElementById('scriptureBody').innerHTML = `<span style="color: #ef4444;">${err.message}. Make sure your local Express server is running on port 3000.</span>`;
+            } finally {
+                runBtn.disabled = false;
+                runBtn.innerText = 'Run API Request';
+            }
+        }
+
+        function copySnippet() {
+            const code = document.querySelector('.snippet-pre code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Snippet copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
