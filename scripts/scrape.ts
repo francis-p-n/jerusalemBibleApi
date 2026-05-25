@@ -10,7 +10,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function fetchHtml(url: string) {
   try {
-    const { stdout } = await execAsync(`curl.exe -s ${url} -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"`, { maxBuffer: 1024 * 1024 * 10 });
+    const { stdout } = await execAsync(`curl.exe -L -s ${url} -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"`, { maxBuffer: 1024 * 1024 * 10 });
     return stdout;
   } catch (error) {
     console.error(`Failed to fetch ${url}:`, error);
@@ -19,8 +19,9 @@ async function fetchHtml(url: string) {
 }
 
 async function scrapeMainPage() {
-  const html = await fetchHtml('http://morningstarinfosys.com/jerusalem-bible/');
+  const html = await fetchHtml('https://morningstarinfosys.com/jerusalem-bible/');
   if (!html) return [];
+  console.log('HTML fetched:', html.length, 'bytes');
 
   const $ = cheerio.load(html);
   const links: { title: string, url: string, groupTitle: string }[] = [];
@@ -110,10 +111,20 @@ async function scrapeBook(url: string) {
     }
   }
 
-  return Array.from(parsedChapters.entries()).map(([chapterNum, verses]) => ({
-    number: chapterNum,
-    verses
-  })).sort((a, b) => a.number - b.number);
+  return Array.from(parsedChapters.entries()).map(([chapterNum, verses]) => {
+    const uniqueVerses: { number: number, text: string }[] = [];
+    const seen = new Set<number>();
+    for (const v of verses) {
+      if (!seen.has(v.number)) {
+        seen.add(v.number);
+        uniqueVerses.push(v);
+      }
+    }
+    return {
+      number: chapterNum,
+      verses: uniqueVerses
+    };
+  }).sort((a, b) => a.number - b.number);
 }
 
 async function run() {
