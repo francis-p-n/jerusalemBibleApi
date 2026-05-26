@@ -18,8 +18,8 @@ async function fetchHtml(url: string) {
   }
 }
 
-async function scrapeMainPage() {
-  const html = await fetchHtml('https://morningstarinfosys.com/jerusalem-bible/');
+async function scrapeMainPage(baseUrl: string) {
+  const html = await fetchHtml(baseUrl);
   if (!html) return [];
   console.log('HTML fetched:', html.length, 'bytes');
 
@@ -37,7 +37,7 @@ async function scrapeMainPage() {
       if (anchor.length > 0) {
         const href = anchor.attr('href');
         const text = anchor.text().trim();
-        if (href && href.includes('morningstarinfosys.com/jerusalem-bible/')) {
+        if (href && (href.includes('morningstarinfosys.com/jerusalem-bible/') || href.includes('morningstarinfosys.com/%'))) {
           links.push({ title: text, url: href, groupTitle: currentGroup });
         }
       }
@@ -84,8 +84,8 @@ async function scrapeBook(url: string) {
 
   for (const p of paragraphs) {
     // Match "JB GENESIS Chapter 1" or similar
-    const chapterMatch = p.match(/Chapter\s+(\d+)/i);
-    if (chapterMatch && p.toUpperCase().includes('JB ')) {
+    const chapterMatch = p.match(/Chapter\s+(\d+)/i) || p.match(/第(\d+)章/);
+    if (chapterMatch && (p.toUpperCase().includes('JB ') || p.includes('JB') || p.includes('章'))) {
       currentChapter = parseInt(chapterMatch[1], 10);
       if (!parsedChapters.has(currentChapter)) {
         parsedChapters.set(currentChapter, []);
@@ -128,16 +128,22 @@ async function scrapeBook(url: string) {
 }
 
 async function run() {
-  console.log('Scraping main page...');
-  const bookLinks = await scrapeMainPage();
-  console.log(`Found ${bookLinks.length} books.`);
+  const sources = [
+    { lang: 'en', url: 'https://morningstarinfosys.com/jerusalem-bible/' },
+    { lang: 'zh', url: 'https://chinese-bible.morningstarinfosys.com/jerusalem-bible/' }
+  ];
 
   // Clean the database first (optional, but good for idempotency)
   await prisma.verse.deleteMany({});
   await prisma.chapter.deleteMany({});
   await prisma.book.deleteMany({});
 
-  for (let i = 0; i < bookLinks.length; i++) {
+  for (const source of sources) {
+    console.log(`Scraping main page for ${source.lang} (${source.url})...`);
+    const bookLinks = await scrapeMainPage(source.url);
+    console.log(`Found ${bookLinks.length} books for ${source.lang}.`);
+
+    for (let i = 0; i < bookLinks.length; i++) {
     const link = bookLinks[i];
     const slug = link.url.split('/').filter(Boolean).pop() || `book-${i}`;
     
@@ -161,6 +167,7 @@ async function run() {
         genre,
         testament,
         order: i + 1,
+        language: source.lang,
         chaptersCount: chaptersData.length
       }
     });
@@ -181,7 +188,8 @@ async function run() {
             number: v.number,
             text: v.text,
             bookSlug: slug,
-            chapterNum: chapter.number
+            chapterNum: chapter.number,
+            language: source.lang
           }))
         });
       }
@@ -189,6 +197,7 @@ async function run() {
     
     console.log(`Saved ${link.title}: ${chaptersData.length} chapters.`);
     await sleep(500); // delay to avoid rate-limiting
+  }
   }
   
   console.log('Done!');

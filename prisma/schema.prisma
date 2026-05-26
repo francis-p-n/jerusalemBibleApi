@@ -9,14 +9,19 @@ generator client {
 
 model Book {
   id            Int       @id @default(autoincrement())
-  slug          String    @unique
-  name          String    @unique
+  slug          String
+  name          String
   shortName     String
   testament     String    // "Old" or "New"
   genre         String    // "Pentateuch", "Historical", "Wisdom", "Prophets", "Deuterocanon", "Gospels", "Acts", "Epistles", "Revelation"
-  order         Int       @unique   // 1 to 73
+  order         Int       // 1 to 73
+  language      String    @default("en") // "en" or "zh"
   chaptersCount Int
   chapters      Chapter[]
+
+  @@unique([slug, language])
+  @@unique([name, language])
+  @@unique([order, language])
 }
 
 model Chapter {
@@ -37,8 +42,9 @@ model Verse {
   text       String  // Verse content
   bookSlug   String  // De-normalized book slug for rapid querying
   chapterNum Int     // De-normalized chapter number for rapid querying
+  language   String  @default("en") // De-normalized language for rapid querying
   chapter    Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@unique([chapterId, number])
-  @@index([bookSlug, chapterNum, number])
+  @@index([language, bookSlug, chapterNum, number])
 }

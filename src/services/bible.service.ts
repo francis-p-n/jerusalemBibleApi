@@ -5,8 +5,8 @@ export class BibleService {
   /**
    * Retrieves all books, optionally filtered by testament or genre.
    */
-  async getBooks(testament?: string, genre?: string) {
-    const where: any = {};
+  async getBooks(language: string = 'en', testament?: string, genre?: string) {
+    const where: any = { language };
     if (testament) {
       where.testament = { equals: testament, mode: 'insensitive' };
     }
@@ -22,11 +22,11 @@ export class BibleService {
   /**
    * Finds a book by matching its name, slug, or short name using a fuzzy normalized match.
    */
-  async findBookByQuery(bookQuery: string) {
+  async findBookByQuery(bookQuery: string, language: string = 'en') {
     const normalizedQuery = normalizeString(bookQuery);
     if (!normalizedQuery) return null;
 
-    const allBooks = await prisma.book.findMany();
+    const allBooks = await prisma.book.findMany({ where: { language } });
     
     // 1. Direct Slug/Name match
     let found = allBooks.find(
@@ -52,8 +52,8 @@ export class BibleService {
   /**
    * Gets details of a book, including its chapters.
    */
-  async getBookDetails(slug: string) {
-    const book = await this.findBookByQuery(slug);
+  async getBookDetails(slug: string, language: string = 'en') {
+    const book = await this.findBookByQuery(slug, language);
     if (!book) return null;
 
     const chapters = await prisma.chapter.findMany({
@@ -70,13 +70,13 @@ export class BibleService {
   /**
    * Retrieves verses for a given passage reference.
    */
-  async getPassage(refStr: string) {
+  async getPassage(refStr: string, language: string = 'en') {
     const parsedRef = parseReference(refStr);
     if (!parsedRef) {
       throw new Error(`Could not parse bible reference format.`);
     }
 
-    const book = await this.findBookByQuery(parsedRef.bookQuery);
+    const book = await this.findBookByQuery(parsedRef.bookQuery, language);
     if (!book) {
       throw new Error(`Book not found matching: "${parsedRef.bookQuery}"`);
     }
@@ -94,6 +94,7 @@ export class BibleService {
         verses = await prisma.verse.findMany({
           where: {
             bookSlug: book.slug,
+            language: language,
             OR: [
               { chapterNum: startChapter, number: { gte: startVerse } },
               { chapterNum: lastChapter, number: { lte: endVerse } },
@@ -108,6 +109,7 @@ export class BibleService {
         verses = await prisma.verse.findMany({
           where: {
             bookSlug: book.slug,
+            language: language,
             chapterNum: { gte: startChapter, lte: lastChapter },
           },
           orderBy: [{ chapterNum: 'asc' }, { number: 'asc' }],
@@ -122,6 +124,7 @@ export class BibleService {
           verses = await prisma.verse.findMany({
             where: {
               bookSlug: book.slug,
+              language: language,
               chapterNum: startChapter,
               number: { gte: startVerse, lte: endVerse },
             },
@@ -133,6 +136,7 @@ export class BibleService {
           verses = await prisma.verse.findMany({
             where: {
               bookSlug: book.slug,
+              language: language,
               chapterNum: startChapter,
               number: startVerse,
             },
@@ -144,6 +148,7 @@ export class BibleService {
         verses = await prisma.verse.findMany({
           where: {
             bookSlug: book.slug,
+            language: language,
             chapterNum: startChapter,
           },
           orderBy: { number: 'asc' },

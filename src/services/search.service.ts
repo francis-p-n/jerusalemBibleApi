@@ -6,6 +6,7 @@ export interface SearchOptions {
   testament?: string;
   limit?: number;
   offset?: number;
+  language?: string;
 }
 
 export class SearchService {
@@ -13,7 +14,7 @@ export class SearchService {
    * Searches for keywords in the Bible verses.
    */
   async search(options: SearchOptions) {
-    const { query, bookSlug, testament, limit = 20, offset = 0 } = options;
+    const { query, bookSlug, testament, language = 'en', limit = 20, offset = 0 } = options;
     if (!query || !query.trim()) {
       return { total: 0, results: [] };
     }
@@ -25,6 +26,7 @@ export class SearchService {
       text: {
         contains: cleanQuery,
       },
+      language,
     };
 
     // Filter by book if specified

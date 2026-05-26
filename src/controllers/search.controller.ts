@@ -7,7 +7,7 @@ const searchService = new SearchService();
 export const searchBible = async (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
   try {
-    const { q, book, testament, limit, offset } = req.query;
+    const { q, book, testament, limit, offset, lang } = req.query;
 
     if (!q || typeof q !== 'string' || !q.trim()) {
       return sendError(
@@ -25,6 +25,7 @@ export const searchBible = async (req: Request, res: Response, next: NextFunctio
       query: q,
       bookSlug: book as string | undefined,
       testament: testament as string | undefined,
+      language: (lang as string) || 'en',
       limit: parsedLimit,
       offset: parsedOffset,
     });

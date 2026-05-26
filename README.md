@@ -1,6 +1,6 @@
 # Jerusalem Bible API Framework
 
-A production-grade, highly performant REST API for the **Jerusalem Bible** translation. Custom-designed to support the **73-book Catholic Canon** (including the Deuterocanonical books like Wisdom, Sirach, Judith, Tobit, and 1 & 2 Maccabees).
+A production-grade, highly performant REST API for the **Jerusalem Bible** translation. Custom-designed to support the **73-book Catholic Canon** *(including the Deuterocanonical books like Wisdom, Sirach, Judith, Tobit, and 1 & 2 Maccabees).* [Source:](https://www.josemariaweek.opusdei.org/en/article/jerusalem-bible-what-is)
 
 Built with a fast Node.js & TypeScript stack, using **Prisma ORM** with **SQLite** for zero-dependency portability and rapid query execution.
 
