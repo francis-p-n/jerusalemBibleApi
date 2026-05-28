@@ -136,9 +136,12 @@ Perform keyword lookup across all scriptures with offset-based pagination.
 
 ---
 
-## 📖 Expanding to the Full Bible Text
+## 📖 Populating the Full Bible Text
 
-The database is pre-structured to house all 31,000+ verses of scripture. To populate the complete Jerusalem Bible text:
-1.  Obtain a raw data format (e.g. JSON, CSV, or XML) of the Jerusalem Bible translation.
-2.  Write an importer script in the `prisma/` folder that matches book names or order IDs.
-3.  Execute the script using `npx ts-node` to load it straight into `./prisma/dev.db`.
+The database comes pre-structured to house all 31,000+ verses of scripture. To populate the complete Jerusalem Bible text (both English and Chinese versions) directly from the source:
+
+1. Run the built-in scraper script which fetches the full 73-book canon:
+```bash
+npm run scrape
+```
+2. The script will automatically scrape all chapters and verses, strip out any footnote annotations, and seed your local `./prisma/dev.db` database. This process takes a couple of minutes to complete.
