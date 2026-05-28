@@ -4,7 +4,7 @@ import bibleRoutes from './bible.routes';
 const router = Router();
 
 // Version 1 of the Bible API
-router.use('/v1', bibleRoutes);
+router.use('/v1/bible', bibleRoutes);
 
 // Health check endpoint
 router.get('/health', (_req, res) => {

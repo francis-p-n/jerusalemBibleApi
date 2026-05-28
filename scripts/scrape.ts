@@ -98,7 +98,10 @@ async function scrapeBook(url: string) {
     if (verseMatch) {
       const chap = parseInt(verseMatch[1], 10);
       const verseNum = parseInt(verseMatch[2], 10);
-      const verseText = verseMatch[3].trim();
+      let verseText = verseMatch[3].trim();
+      
+      // Remove footnotes e.g. [*a], [a], [*1]
+      verseText = verseText.replace(/\[\*?[a-zA-Z0-9]+\]/g, '').trim();
       
       if (currentChapter === -1) {
           currentChapter = chap;
